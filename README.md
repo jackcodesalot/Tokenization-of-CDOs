@@ -1,5 +1,4 @@
 
-
 # Tokenized Collateral Verification & Smart Contract Automation for Mortgage Finance
 
 ## Overview
