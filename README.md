@@ -3,7 +3,7 @@
 
 ## Overview
 
-This project, worked by a team of students in conjunction with  explores how **tokenization and smart contracts** can be applied to **post-origination mortgage workflows** to reduce redundant verification, operational delays, and compliance friction across lenders, aggregators, and structured finance products such as **CLOs / CMOs**.
+This project, worked by a team of students, explores how **tokenization and smart contracts** can be applied to **post-origination mortgage workflows** to reduce redundant verification, operational delays, and compliance friction across lenders, aggregators, and structured finance products such as **CLOs / CMOs**.
 
 The work is being developed with mentorship from executives at Broadridge Financial Solutions (Fortune 500), helping ground the proposal in real-world capital markets infrastructure and institutional constraints.
 
