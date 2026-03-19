@@ -288,8 +288,8 @@ The deployed `CreditTranche.sol` exposes the following functions:
 ### Installation
 
 ```bash
-git clone <repo-url>
-cd credit-protocol
+git clone https://github.com/jackcodesalot/Tokenization-of-CDOs
+cd Tokenization-of-CDOs
 npm install
 cp .env.example .env
 ```
