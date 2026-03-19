@@ -7,19 +7,19 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  * @title CreditTranche
  * @notice Stores credit risk tranche assignments for users.
  *         Only verified bank admins can submit or read full profiles.
- *         The raw PII is never stored here — only an encrypted reference
+ *         The raw PII is never stored here - only an encrypted reference
  *         (e.g. an IPFS hash of the encrypted blob) and the resulting score.
  *
  * Tranche levels:
- *   AAA (3) — low risk,  score >= 75
- *   AA  (2) — mid risk,  score >= 50
- *   B   (1) — high risk, score <  50
+ *   AAA (3) - low risk,  score >= 75
+ *   AA  (2) - mid risk,  score >= 50
+ *   B   (1) - high risk, score <  50
  */
 contract CreditTranche is AccessControl {
 
     // ─── Roles ──────────────────────────────────────────────────────────────
     // DEFAULT_ADMIN_ROLE (from OZ): can grant/revoke ADMIN_ROLE
-    // ADMIN_ROLE: bank admins — can assign tranches and read full profiles
+    // ADMIN_ROLE: bank admins - can assign tranches and read full profiles
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     // ─── Types ───────────────────────────────────────────────────────────────
@@ -84,7 +84,7 @@ contract CreditTranche is AccessControl {
     ) external onlyRole(ADMIN_ROLE) {
         require(user != address(0),       "Zero address");
         require(tranche >= 1 && tranche <= 3, "Tranche must be 1, 2, or 3");
-        require(score <= 100,             "Score must be 0–100");
+        require(score <= 100,             "Score must be 0-100");
         require(bytes(encryptedDataRef).length > 0, "Data ref required");
 
         if (!_profiles[user].exists) {
@@ -131,7 +131,7 @@ contract CreditTranche is AccessControl {
     }
 
     /**
-     * @notice Returns only the tranche label. Public — useful for lending logic.
+     * @notice Returns only the tranche label. Public - useful for lending logic.
      *         Does NOT expose any PII reference.
      */
     function getTranche(address user) external view returns (string memory) {

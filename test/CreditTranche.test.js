@@ -124,7 +124,7 @@ describe("CreditTranche", function () {
     it("reverts on score > 100", async () => {
       await expect(
         contract.connect(admin).assignTranche(user1.address, 3, 101, FAKE_REF)
-      ).to.be.revertedWith("Score must be 0–100");
+      ).to.be.revertedWith("Score must be 0-100");
     });
 
     it("reverts on empty data ref", async () => {
