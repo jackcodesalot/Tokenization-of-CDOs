@@ -66,7 +66,7 @@ async function main() {
   );
   await tx.wait();
 
-  console.log("  ✅ Transaction confirmed:", tx.hash);
+  console.log("  Transaction confirmed:", tx.hash);
   console.log("  User:", applicantAddress);
   console.log("  Assigned tranche:", result.tranche);
 
