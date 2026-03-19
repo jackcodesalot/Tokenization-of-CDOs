@@ -1,9 +1,8 @@
-
 # Tokenized Collateral Verification & Smart Contract Automation for Mortgage Finance
 
 ## Overview
 
-This project, worked by a team of students, explores how **tokenization and smart contracts** can be applied to **post-origination mortgage workflows** to reduce redundant verification, operational delays, and compliance friction across lenders, aggregators, and structured finance products such as **CLOs / CMOs**.
+This project, worked on by a team of students, explores how **tokenization and smart contracts** can be applied to **post-origination mortgage workflows** to reduce redundant verification, operational delays, and compliance friction across lenders, aggregators, and structured finance products such as **CLOs / CMOs**.
 
 The work is being developed with mentorship from executives at Broadridge Financial Solutions (Fortune 500), helping ground the proposal in real-world capital markets infrastructure and institutional constraints.
 
@@ -31,7 +30,7 @@ In traditional mortgage and structured finance workflows:
   * Information silos
   * Increased risk of human error
 
- These inefficiencies compound significantly.
+These inefficiencies compound significantly.
 
 ---
 
@@ -93,7 +92,7 @@ Humans make decisions; smart contracts handle **repetitive, deterministic execut
 
 ## End-to-End Tokenization Flow
 
-### Stage 1: Loan Origination : Tokenized Verified Loan Package
+### Stage 1: Loan Origination → Tokenized Verified Loan Package
 
 * Mortgages are originated and fully underwritten by banks/lenders
 * Once verification is complete, a **loan verification token** is issued
@@ -104,7 +103,7 @@ Humans make decisions; smart contracts handle **repetitive, deterministic execut
 
 ---
 
-### Stage 2: Aggregation / Warehousing:  Pool-Ready Eligibility
+### Stage 2: Aggregation / Warehousing → Pool-Ready Eligibility
 
 * Smart contracts evaluate tokens against predefined criteria:
 
@@ -117,7 +116,7 @@ Humans make decisions; smart contracts handle **repetitive, deterministic execut
 
 ---
 
-### Stage 3: CLO / CMO Structuring:  Tokenized Tranches
+### Stage 3: CLO / CMO Structuring → Tokenized Tranches
 
 * Verified loan tokens are bundled into structured products
 * Tranches (senior, mezzanine, equity) are issued as **permissioned tokens**
@@ -126,7 +125,6 @@ Humans make decisions; smart contracts handle **repetitive, deterministic execut
 **Benefit:** Transparent ownership, automated waterfalls, and reduced operational risk.
 
 ---
-
 
 ## Dynamic Risk & Valuation
 
@@ -167,7 +165,215 @@ Losses are absorbed bottom-up; protections tighten as risk increases.
 
 ---
 
-## A little more about the project
+## System Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   BANK ADMIN FRONTEND                │
+│         (Submit user data / Query tranche)           │
+└────────────────────┬──────────────────┬─────────────┘
+                     │                  │
+              Submit Data           Query Result
+                     │                  │
+┌────────────────────▼──────────────────▼─────────────┐
+│                  BACKEND / ORACLE                    │
+│  1. Receives raw credit data from bank admin         │
+│  2. Runs scoring algorithm (rules-based)             │
+│  3. Encrypts PII (name, SSN, etc.) with admin key    │
+│  4. Submits score + encrypted blob to contract       │
+└────────────────────────────┬────────────────────────┘
+                             │
+                    Score + tranche +
+                    encrypted blob ref
+                             │
+┌────────────────────────────▼────────────────────────┐
+│               SMART CONTRACT (on-chain)              │
+│  - Stores: userAddress → tranche (AAA / AA / B)      │
+│  - Stores: encrypted data blob reference             │
+│  - Access control: only verified admins can read     │
+│  - Emits events on tranche assignment                │
+└─────────────────────────────────────────────────────┘
+```
+
+> **Important:** Smart contracts are fully public. Raw PII is never stored on-chain. The contract stores only a reference (e.g. an IPFS hash) to an encrypted blob that lives off-chain. Encryption and decryption always happen off-chain.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Smart contract | Solidity 0.8.20 |
+| Access control | OpenZeppelin AccessControl |
+| Development framework | Hardhat |
+| Scoring engine | Node.js (rules-based, off-chain) |
+| Frontend (in progress) | To be wired up via ethers.js |
+
+---
+
+## Project Structure
+
+```
+.
+├── contracts/
+│   └── CreditTranche.sol       ← the smart contract
+├── scripts/
+│   ├── deploy.js               ← deploys the contract
+│   ├── scorer.js               ← off-chain risk scoring engine
+│   └── submitApplicant.js      ← full admin submission flow
+├── test/
+│   └── CreditTranche.test.js   ← 27 tests (all passing)
+├── hardhat.config.js
+├── package.json
+└── .env.example
+```
+
+---
+
+## Risk Scoring Algorithm
+
+The off-chain scorer (`scripts/scorer.js`) takes six inputs from the bank admin and produces a **composite score (0–100)** and a **tranche assignment**.
+
+### Inputs
+
+| Factor | Weight |
+|---|---|
+| Credit score (300–850) | 30 pts |
+| Debt-to-income ratio | 25 pts |
+| Annual income | 20 pts |
+| Payment history | 15 pts |
+| Employment status | 10 pts |
+
+### Tranche Thresholds
+
+| Tranche | Score | Risk Level |
+|---|---|---|
+| AAA | >= 75 | Low |
+| AA | >= 50 | Moderate |
+| B | < 50 | High |
+
+---
+
+## Smart Contract Interface
+
+The deployed `CreditTranche.sol` exposes the following functions:
+
+| Function | Access | Description |
+|---|---|---|
+| `assignTranche(address, trancheId, score, encryptedRef)` | Admin only | Submits a scored applicant |
+| `getProfile(address)` | Admin only | Returns full profile + encrypted ref |
+| `getTranche(address)` | Public | Returns `"AAA"`, `"AA"`, or `"B"` |
+| `getScore(address)` | Public | Returns the numeric score |
+| `profileExists(address)` | Public | Returns true/false |
+| `getAllUsers()` | Admin only | Returns all profiled wallet addresses |
+| `addAdmin(address)` | Owner only | Promotes a wallet to admin |
+| `removeAdmin(address)` | Owner only | Revokes admin access |
+
+### Role System
+
+* `DEFAULT_ADMIN_ROLE` — the deployer. Can grant and revoke admin roles. Should be a multisig in production.
+* `ADMIN_ROLE` — bank staff. Can submit applicants and read full profiles.
+* Public — anyone can read tranche labels and scores. No PII is exposed.
+
+---
+
+## Local Setup
+
+### Prerequisites
+
+* Node.js >= 18
+* npm
+* MetaMask (for frontend development)
+
+### Installation
+
+```bash
+git clone <repo-url>
+cd credit-protocol
+npm install
+cp .env.example .env
+```
+
+### Running Locally
+
+**Terminal 1 — start the local blockchain:**
+```bash
+npx hardhat node
+```
+
+This prints 20 funded test accounts with their private keys. `Account #0` is the deployer and automatically receives admin rights.
+
+**Terminal 2 — deploy the contract:**
+```bash
+npx hardhat run scripts/deploy.js --network localhost
+```
+
+Copy the printed contract address and add it to `.env`:
+```
+CONTRACT_ADDRESS=0x...
+```
+
+### Running Tests
+
+```bash
+npx hardhat test
+```
+
+All 27 tests should pass. The suite covers deployment, access control, tranche assignment, input validation, profile queries, and end-to-end scorer integration.
+
+### Testing the Scorer Standalone
+
+```bash
+node scripts/scorer.js
+```
+
+Runs three example applicants (AAA, AA, B) and prints scores and breakdowns to the console.
+
+---
+
+## Frontend Integration Guide
+
+The compiled contract ABI is generated automatically on compile and can be found at:
+```
+artifacts/contracts/CreditTranche.sol/CreditTranche.json
+```
+
+This file is what the frontend needs to communicate with the contract. Import it and connect using `ethers.js`:
+
+```js
+import { ethers } from "ethers";
+import CreditTranche from "./artifacts/contracts/CreditTranche.sol/CreditTranche.json";
+
+// Connect to MetaMask
+const provider = new ethers.BrowserProvider(window.ethereum);
+const signer = await provider.getSigner();
+
+// Connect to the deployed contract
+const contract = new ethers.Contract(
+  process.env.CONTRACT_ADDRESS,
+  CreditTranche.abi,
+  signer
+);
+
+// Read a tranche (public)
+const tranche = await contract.getTranche("0x123...abc");
+
+// Submit an applicant (admin wallet required)
+await contract.assignTranche("0x123...abc", 3, 85, "QmIpfsHash...");
+```
+
+### MetaMask Setup for Local Development
+
+1. Open MetaMask → Add a custom network
+2. Set RPC URL to `http://127.0.0.1:8545` and Chain ID to `31337`
+3. Import `Account #0` from the Hardhat node output using its private key
+4. This account is the deployer and has admin rights
+
+> **Note:** Every time `npx hardhat node` is restarted, the contract is wiped and must be redeployed. Update `CONTRACT_ADDRESS` in `.env` each time.
+
+---
+
+## About This Project
 
 ### This project **is**:
 
@@ -185,15 +391,17 @@ Losses are absorbed bottom-up; protections tighten as risk increases.
 
 ## Status
 
-This repository currently serves as:
+This repository currently contains:
 
-* A **conceptual and architectural proposal**
-* A foundation for future technical prototyping
-* A discussion framework for industry feedback
+* A **fully deployed and tested smart contract** (`CreditTranche.sol`) with role-based access control
+* A **rules-based off-chain scoring engine** that maps credit data to tranche assignments
+* A **Hardhat development environment** with 27 passing tests
+* A **frontend integration guide** for connecting a bank admin UI
+
+Frontend development is in progress.
 
 ---
 
 ## Disclaimer
 
 This project is for **educational and exploratory purposes only** and does not constitute financial, legal, or investment advice.
-

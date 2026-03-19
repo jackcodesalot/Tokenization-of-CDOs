@@ -59,4 +59,4 @@ Slower than Foundry for large test suites
 
 Testing logic split between Solidity and JavaScript
 
-## Decision:
+## Decision: Hardhat
