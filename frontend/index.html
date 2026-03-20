@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Loan Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<header class="topbar">
+    <div class="brand">
+        <div class="brand-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </div>
+        <div>
+            <div class="brand-name">Broadridge</div>
+            <div class="brand-sub">Loan Reverification Platform</div>
+        </div>
+    </div>
+    <div class="live-badge" onclick="connectWallet()">
+        <div class="live-dot"></div>
+        <span id="walletLabel">Live System</span>
+    </div>
+</header>
+
+<nav class="nav-bar">
+    <div class="nav-tab active" onclick="showPage('dashboard',this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+    </div>
+    <div class="nav-tab" onclick="showPage('ledger',this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Tokenized Ledger
+    </div>
+    <div class="nav-tab" onclick="showPage('applications',this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Applications
+    </div>
+    <div class="nav-tab" onclick="showPage('analytics',this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Analytics
+    </div>
+</nav>
+
+<div class="wallet-bar">
+    <div class="wbar-left">
+        <div class="wbar-item">
+            <div class="wbar-dot" id="contractDot" style="background:var(--text-3)"></div>
+            <span>Contract:</span><span class="wbar-val" id="contractLabel">Not configured</span>
+        </div>
+        <div class="wbar-item">
+            <div class="wbar-dot" id="walletDot" style="background:var(--text-3)"></div>
+            <span>Wallet:</span><span class="wbar-val" id="walletAddr">Disconnected</span>
+        </div>
+        <div class="wbar-item">
+            <div class="wbar-dot" id="networkDot" style="background:var(--text-3)"></div>
+            <span>Network:</span><span class="wbar-val" id="networkLabel">—</span>
+        </div>
+    </div>
+    <div style="display:flex;gap:0.5rem;align-items:center">
+        <input id="contractInput" type="text" placeholder="Paste contract address…" style="width:300px;font-size:0.75rem;padding:0.35rem 0.7rem"/>
+        <button class="btn btn-navy btn-sm" onclick="setContract()">Connect</button>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+    <div class="page-header">
+        <div>
+            <div class="page-title">Loan Reverification Dashboard</div>
+            <div class="page-sub">Real-time monitoring of automated loan processing and tokenization</div>
+        </div>
+        <button class="auto-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-9.49"/></svg>
+            Auto-Processing Active
+        </button>
+    </div>
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Applications
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="stat-val" id="d-total">16</div>
+            <div class="stat-trend trend-up"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> +12%</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Approved Loans
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="stat-val" id="d-approved">10</div>
+            <div class="stat-trend trend-up"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> +18%</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Processing
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="stat-val" id="d-processing">3</div>
+            <div class="stat-trend trend-dn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg> -5%</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Volume
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="stat-val">$5.1M</div>
+            <div class="stat-trend trend-up"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> +24%</div>
+        </div>
+    </div>
+
+    <div class="two-col">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title" style="display:flex;align-items:center;gap:0.5rem">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    System Health
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="health-row"><div class="health-label"><span>Blockchain Sync</span><span>100%</span></div><div class="progress-track"><div class="progress-fill" style="width:100%"></div></div></div>
+                <div class="health-row"><div class="health-label"><span>Token Minting</span><span>98%</span></div><div class="progress-track"><div class="progress-fill" style="width:98%"></div></div></div>
+                <div class="health-row"><div class="health-label"><span>Processing Queue</span><span>85%</span></div><div class="progress-track"><div class="progress-fill" style="width:85%"></div></div></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span class="card-title">Recently Approved &amp; Tokenized</span></div>
+            <div class="card-body" style="padding:0.5rem 1.25rem">
+                <div id="recentTokenized"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><span class="card-title">Tranche Distribution</span></div>
+        <div class="card-body">
+            <div class="tranche-grid">
+                <div class="tranche-card">
+                    <div class="tranche-head"><span class="tranche-name">Tranche AAA</span><span class="tranche-count" id="tc-aaa">4/6</span></div>
+                    <div class="progress-track"><div class="progress-fill" id="tc-aaa-bar" style="width:67%"></div></div>
+                    <div class="tranche-pct" id="tc-aaa-pct">67% Approved</div>
+                </div>
+                <div class="tranche-card">
+                    <div class="tranche-head"><span class="tranche-name">Tranche AA</span><span class="tranche-count" id="tc-aa">3/5</span></div>
+                    <div class="progress-track"><div class="progress-fill" id="tc-aa-bar" style="width:60%"></div></div>
+                    <div class="tranche-pct" id="tc-aa-pct">60% Approved</div>
+                </div>
+                <div class="tranche-card">
+                    <div class="tranche-head"><span class="tranche-name">Tranche B</span><span class="tranche-count" id="tc-b">3/5</span></div>
+                    <div class="progress-track"><div class="progress-fill" id="tc-b-bar" style="width:60%"></div></div>
+                    <div class="tranche-pct" id="tc-b-pct">60% Approved</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TOKENIZED LEDGER -->
+<div class="page" id="page-ledger">
+    <div class="page-header">
+        <div><div class="page-title">Tokenized Ledger</div><div class="page-sub">Immutable blockchain records of all loan tokenization events</div></div>
+    </div>
+    <div class="ledger-stats">
+        <div class="ledger-stat ls-total">
+            <div class="ls-label"><span>Total Transactions</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div class="ls-val" id="ls-total">20</div>
+        </div>
+        <div class="ledger-stat ls-aaa">
+            <div class="ls-label">Tranche AAA<div class="ls-badge">AAA</div></div>
+            <div class="ls-val" id="ls-aaa">8</div>
+        </div>
+        <div class="ledger-stat ls-aa">
+            <div class="ls-label">Tranche AA<div class="ls-badge" style="background:rgba(11,191,191,0.6)">AA</div></div>
+            <div class="ls-val" id="ls-aa">6</div>
+        </div>
+        <div class="ledger-stat ls-b">
+            <div class="ls-label">Tranche B<div class="ls-badge" style="background:rgba(11,191,191,0.35)">B</div></div>
+            <div class="ls-val" id="ls-b">6</div>
+        </div>
+    </div>
+    <div class="search-bar">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="ledgerSearch" placeholder="Search by Loan ID, Transaction ID, or Hash…" oninput="renderLedger()"/>
+    </div>
+    <div class="filter-btns">
+        <button class="filter-btn active" onclick="setLedgerFilter('all',this)">All</button>
+        <button class="filter-btn" onclick="setLedgerFilter('AAA',this)">AAA</button>
+        <button class="filter-btn" onclick="setLedgerFilter('AA',this)">AA</button>
+        <button class="filter-btn" onclick="setLedgerFilter('B',this)">B</button>
+    </div>
+    <div class="txn-list" id="txnList"></div>
+</div>
+
+<!-- APPLICATIONS -->
+<div class="page" id="page-applications">
+    <div class="page-header">
+        <div><div class="page-title">Loan Applications</div><div class="page-sub">Monitor and manage all loan applications through the reverification process</div></div>
+        <button class="btn btn-primary" onclick="showPage('submit',document.getElementById('submitNavTab'))">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Application
+        </button>
+    </div>
+    <div class="app-filters">
+        <button class="af-btn active" data-s="all" onclick="setAppFilter('all',this)">All <span class="af-count" id="af-all">16</span></button>
+        <button class="af-btn" data-s="approved" onclick="setAppFilter('approved',this)">Approved <span class="af-count" id="af-approved">10</span></button>
+        <button class="af-btn" data-s="processing" onclick="setAppFilter('processing',this)">Processing <span class="af-count" id="af-processing">3</span></button>
+        <button class="af-btn" data-s="pending" onclick="setAppFilter('pending',this)">Pending <span class="af-count" id="af-pending">3</span></button>
+        <button class="af-btn" data-s="rejected" onclick="setAppFilter('rejected',this)">Rejected <span class="af-count" id="af-rejected">0</span></button>
+    </div>
+    <div class="app-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="appSearch" placeholder="Search by applicant name, loan ID, or token ID…" oninput="renderApps()"/>
+    </div>
+    <div id="appList"></div>
+</div>
+
+<!-- SUBMIT (hidden nav) -->
+<div id="submitNavTab" style="display:none"></div>
+<div class="page" id="page-submit">
+    <div class="page-header">
+        <div><div class="page-title">New Loan Application</div><div class="page-sub">Score and submit a loan package for on-chain tranche assignment</div></div>
+        <button class="btn btn-outline" onclick="showPage('applications',document.querySelectorAll('.nav-tab')[2])">← Back to Applications</button>
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;align-items:start">
+        <div class="card">
+            <div class="card-header"><span class="card-title">Applicant Information</span></div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="form-group"><label>Full Name</label><input type="text" id="in-name" placeholder="e.g. James Anderson"/></div>
+                    <div class="form-group"><label>Wallet Address</label><input type="text" id="in-address" placeholder="0x…"/></div>
+                    <div class="form-group"><label>Credit Score (300–850)</label><input type="number" id="in-credit" placeholder="750" min="300" max="850" oninput="previewScore()"/></div>
+                    <div class="form-group"><label>Debt-to-Income Ratio (%)</label><input type="number" id="in-dti" placeholder="32" oninput="previewScore()"/></div>
+                    <div class="form-group"><label>Annual Income ($)</label><input type="number" id="in-income" placeholder="95000" oninput="previewScore()"/></div>
+                    <div class="form-group"><label>Loan Amount ($)</label><input type="number" id="in-loanamt" placeholder="250000"/></div>
+                    <div class="form-group"><label>Payment History</label>
+                        <select id="in-payment" onchange="previewScore()">
+                            <option value="">Select…</option>
+                            <option value="excellent">Excellent — no late payments</option>
+                            <option value="good">Good — 1–2 late (30-day)</option>
+                            <option value="fair">Fair — 3–5 late payments</option>
+                            <option value="poor">Poor — 60+ day or default</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Employment Status</label>
+                        <select id="in-employment" onchange="previewScore()">
+                            <option value="">Select…</option>
+                            <option value="employed">Employed (W-2)</option>
+                            <option value="self_employed">Self-Employed</option>
+                            <option value="part_time">Part-Time</option>
+                            <option value="unemployed">Unemployed</option>
+                        </select>
+                    </div>
+                    <div class="form-group full"><label>Encrypted IPFS Reference</label><input type="text" id="in-ipfs" placeholder="QmHash… (off-chain encrypted PII)"/></div>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="card" style="margin-bottom:1rem">
+                <div class="card-header"><span class="card-title">Risk Score Preview</span></div>
+                <div class="card-body">
+                    <div style="text-align:center;padding:1rem 0 1.25rem">
+                        <div style="font-size:3rem;font-weight:700;color:var(--text-1);letter-spacing:-0.03em" id="scoreDisplay">—</div>
+                        <div style="font-size:0.8rem;color:var(--text-3);margin:0.2rem 0 1rem">out of 100</div>
+                        <div id="tranchePreviewTag"></div>
+                    </div>
+                    <div class="score-bar-track" style="margin-bottom:1rem">
+                        <div class="score-bar-fill" id="scoreFill" style="width:0%"></div>
+                    </div>
+                    <table style="width:100%;font-size:0.775rem;border-collapse:collapse">
+                        <tr><td style="padding:0.3rem 0;color:var(--text-2)">Credit Score</td><td style="text-align:right;font-family:var(--mono);color:var(--text-1)" id="bp-credit">— / 30</td></tr>
+                        <tr><td style="padding:0.3rem 0;color:var(--text-2)">DTI Ratio</td><td style="text-align:right;font-family:var(--mono);color:var(--text-1)" id="bp-dti">— / 25</td></tr>
+                        <tr><td style="padding:0.3rem 0;color:var(--text-2)">Income</td><td style="text-align:right;font-family:var(--mono);color:var(--text-1)" id="bp-income">— / 20</td></tr>
+                        <tr><td style="padding:0.3rem 0;color:var(--text-2)">Payment History</td><td style="text-align:right;font-family:var(--mono);color:var(--text-1)" id="bp-payment">— / 15</td></tr>
+                        <tr><td style="padding:0.3rem 0;color:var(--text-2)">Employment</td><td style="text-align:right;font-family:var(--mono);color:var(--text-1)" id="bp-emp">— / 10</td></tr>
+                    </table>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center;padding:0.75rem" id="submitBtn" onclick="submitApplicant()">Submit to Blockchain</button>
+            <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:0.6rem" onclick="clearForm()">Clear Form</button>
+        </div>
+    </div>
+</div>
+
+<!-- ANALYTICS -->
+<div class="page" id="page-analytics">
+    <div class="page-header">
+        <div><div class="page-title">Analytics &amp; Insights</div><div class="page-sub">Comprehensive analysis of loan reverification performance</div></div>
+    </div>
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Avg Processing Time<span style="color:var(--red);font-size:0.72rem;font-weight:600;margin-left:auto">-15%</span></div>
+            <div class="stat-val">2.3 <span style="font-size:1rem;font-weight:500">days</span></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" style="flex-shrink:0"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>Approval Rate<span style="color:var(--green);font-size:0.72rem;font-weight:600;margin-left:auto">+8%</span></div>
+            <div class="stat-val">62.5<span style="font-size:1rem;font-weight:500">%</span></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" style="flex-shrink:0"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Total Volume<span style="color:var(--green);font-size:0.72rem;font-weight:600;margin-left:auto">+24%</span></div>
+            <div class="stat-val">$5.3M</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" style="flex-shrink:0"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>Avg Loan Size<span style="color:var(--green);font-size:0.72rem;font-weight:600;margin-left:auto">+12%</span></div>
+            <div class="stat-val">$329K</div>
+        </div>
+    </div>
+    <div class="analytics-grid">
+        <div class="card"><div class="card-header"><span class="card-title">Application Trends</span></div><div class="card-body"><div class="chart-container"><canvas id="trendsChart"></canvas></div></div></div>
+        <div class="card"><div class="card-header"><span class="card-title">Tranche Distribution</span></div><div class="card-body" style="display:flex;align-items:center;justify-content:center"><div class="chart-container" style="height:200px;width:200px"><canvas id="pieChart"></canvas></div></div></div>
+        <div class="card"><div class="card-header"><span class="card-title">Approval Rate by Tranche</span></div><div class="card-body"><div class="chart-container"><canvas id="approvalChart"></canvas></div></div></div>
+        <div class="card"><div class="card-header"><span class="card-title">Volume by Tranche</span></div><div class="card-body"><div class="chart-container"><canvas id="volumeChart"></canvas></div></div></div>
+    </div>
+</div>
+
+<footer style="text-align:center;padding:1.5rem;font-size:0.75rem;color:var(--text-3);border-top:1px solid var(--border);background:#fff;margin-top:1rem">
+    © 2026 Broadridge Financial Solutions. Automated Loan Reverification System.
+</footer>
+
+<div id="toasts"></div>
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+        <h3 id="modalTitle">Confirm</h3>
+        <p id="modalBody"></p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" id="modalConfirmBtn">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+/* ABI */
+const ABI=[
+    "function assignTranche(address user,uint8 trancheId,uint8 score,string calldata encryptedRef) external",
+    "function getProfile(address user) external view returns (uint8 tranche,uint8 score,string memory encryptedDataRef,uint256 updatedAt)",
+    "function getTranche(address user) external view returns (string memory)",
+    "function getScore(address user) external view returns (uint8)",
+    "function profileExists(address user) external view returns (bool)",
+    "function getAllUsers() external view returns (address[] memory)",
+    "function addAdmin(address account) external",
+    "function removeAdmin(address account) external",
+    "function hasRole(bytes32 role,address account) external view returns (bool)",
+    "event TrancheAssigned(address indexed user,uint8 tranche,uint8 score,uint256 timestamp)",
+];
+
+/* STATE */
+let provider,signer,contract;
+let contractAddress=localStorage.getItem('br_contract')||'';
+let allUsers=[];
+let txnLog=[];
+let ledgerFilter='all';
+let appFilter='all';
+
+/* SEED DEMO DATA */
+function seedDemo(){
+    allUsers=[
+        {addr:'0x1a2b3c4d5e6f7890',name:'James Anderson',loanId:'LOAN-000001',tranche:'AAA',score:72,loanAmt:238123,trancheType:'Senior Secured',rate:'4.5%',status:'approved',stage:5,stageMax:5,stageLabel:'Final Approval',submitted:'3/9/2026',minted:true,tokenId:'TKN-AAA-00000001'},
+        {addr:'0x2b3c4d5e6f7a8901',name:'Maria Garcia',loanId:'LOAN-000002',tranche:'AA',score:61,loanAmt:433433,trancheType:'Mezzanine',rate:'6.8%',status:'processing',stage:4,stageMax:5,stageLabel:'Compliance Check',submitted:'3/5/2026',minted:false,tokenId:null},
+        {addr:'0x3c4d5e6f7a8b9012',name:'Robert Chen',loanId:'LOAN-000003',tranche:'B',score:70,loanAmt:111227,trancheType:'Junior',rate:'8.2%',status:'pending',stage:3,stageMax:5,stageLabel:'Risk Analysis',submitted:'3/1/2026',minted:false,tokenId:null},
+        {addr:'0x4d5e6f7a8b9c0123',name:'Linda Johnson',loanId:'LOAN-000004',tranche:'AAA',score:93,loanAmt:287813,trancheType:'Senior Secured',rate:'4.1%',status:'approved',stage:5,stageMax:5,stageLabel:'Final Approval',submitted:'3/7/2026',minted:true,tokenId:'TKN-AAA-00000004'},
+        {addr:'0x5e6f7a8b9c0d1234',name:'Michael Brown',loanId:'LOAN-000005',tranche:'AA',score:63,loanAmt:146247,trancheType:'Mezzanine',rate:'5.9%',status:'approved',stage:5,stageMax:5,stageLabel:'Final Approval',submitted:'3/6/2026',minted:true,tokenId:'TKN-AA-00000005'},
+        {addr:'0x6f7a8b9c0d1e2345',name:'Sarah Williams',loanId:'LOAN-000006',tranche:'B',score:81,loanAmt:185119,trancheType:'Junior',rate:'9.1%',status:'approved',stage:5,stageMax:5,stageLabel:'Final Approval',submitted:'3/4/2026',minted:true,tokenId:'TKN-B-00000006'},
+        {addr:'0x9c0d1e2f3a4b5678',name:'David Martinez',loanId:'LOAN-000011',tranche:'AAA',score:69,loanAmt:384122,trancheType:'Senior Secured',rate:'4.3%',status:'processing',stage:3,stageMax:5,stageLabel:'Underwriting',submitted:'3/10/2026',minted:false,tokenId:null},
+        {addr:'0x8b9c0d1e2f3a4567',name:'Jennifer Davis',loanId:'LOAN-000010',tranche:'AA',score:95,loanAmt:439672,trancheType:'Mezzanine',rate:'6.2%',status:'pending',stage:2,stageMax:5,stageLabel:'Document Review',submitted:'3/8/2026',minted:false,tokenId:null},
+        {addr:'0x7a8b9c0d1e2f3456',name:'William Taylor',loanId:'LOAN-000009',tranche:'B',score:76,loanAmt:408266,trancheType:'Junior',rate:'8.7%',status:'approved',stage:5,stageMax:5,stageLabel:'Final Approval',submitted:'3/3/2026',minted:true,tokenId:'TKN-B-00000009'},
+        {addr:'0x0d1e2f3a4b5c6789',name:'Elizabeth Moore',loanId:'LOAN-000012',tranche:'B',score:76,loanAmt:95000,trancheType:'Junior',rate:'10.2%',status:'processing',stage:2,stageMax:5,stageLabel:'Credit Review',submitted:'3/11/2026',minted:false,tokenId:null},
+    ];
+    txnLog=[
+        {id:'TXN-00000013',loanId:'LOAN-000011',tranche:'AA',block:'#1000100',hash:'0xb7171d2c216758',status:'Created',ts:'3/19/2026, 1:30:40 PM'},
+        {id:'TXN-00000014',loanId:'LOAN-000011',tranche:'AA',block:'#1000105',hash:'0xe35926fbc63b6',status:'Badge Stamped',ts:'3/19/2026, 12:10:41 PM'},
+        {id:'TXN-00000018',loanId:'LOAN-000015',tranche:'B',block:'#1000145',hash:'0xf5fa234a7ebc5',status:'Badge Stamped',ts:'3/19/2026, 9:51:27 AM'},
+        {id:'TXN-00000017',loanId:'LOAN-000015',tranche:'B',block:'#1000140',hash:'0x4813246d2c3408',status:'Created',ts:'3/19/2026, 7:04:00 AM'},
+        {id:'TXN-00000002',loanId:'LOAN-000001',tranche:'AAA',block:'#1000005',hash:'0x3c3058b6ccbab8',status:'Badge Stamped',ts:'3/19/2026, 6:38:12 AM'},
+        {id:'TXN-00000016',loanId:'LOAN-000014',tranche:'AA',block:'#1000135',hash:'0x97c15242937df8',status:'Badge Stamped',ts:'3/18/2026, 11:48:52 PM'},
+        {id:'TXN-00000008',loanId:'LOAN-000006',tranche:'B',block:'#1000055',hash:'0xf1bf946a9aa4dd8',status:'Badge Stamped',ts:'3/18/2026, 5:24:48 PM'},
+    ];
+}
+
+window.onload=()=>{
+    if(contractAddress){document.getElementById('contractInput').value=contractAddress;updateContractLabel(contractAddress)}
+    seedDemo();
+    refreshAll();
+    renderCharts();
+};
+
+/* WALLET */
+async function connectWallet(){
+    if(!window.ethereum){toast('MetaMask Required','Install MetaMask to connect.','error');return}
+    try{
+        provider=new ethers.BrowserProvider(window.ethereum);
+        await provider.send('eth_requestAccounts',[]);
+        signer=await provider.getSigner();
+        const addr=await signer.getAddress(),net=await provider.getNetwork();
+        document.getElementById('walletAddr').textContent=addr.slice(0,6)+'…'+addr.slice(-4);
+        document.getElementById('walletDot').className='wbar-dot dot-green';
+        document.getElementById('networkLabel').textContent=net.chainId==31337?'Localhost:31337':'Chain '+net.chainId;
+        document.getElementById('networkDot').style.background='var(--green)';
+        if(contractAddress)initContract();
+        toast('Wallet Connected',addr,'success');
+    }catch(e){toast('Failed',e.message,'error')}
+}
+
+function setContract(){
+    const val=document.getElementById('contractInput').value.trim();
+    if(!val)return;
+    if(!ethers.isAddress(val)){toast('Invalid Address','Not a valid contract address','error');return}
+    contractAddress=val;localStorage.setItem('br_contract',val);
+    updateContractLabel(val);
+    if(signer)initContract();else toast('Contract Set','Connect wallet to activate','info');
+}
+
+function updateContractLabel(addr){
+    document.getElementById('contractLabel').textContent=addr.slice(0,6)+'…'+addr.slice(-4);
+    document.getElementById('contractDot').style.background='var(--green)';
+}
+
+async function initContract(){
+    try{
+        contract=new ethers.Contract(contractAddress,ABI,signer);
+        contract.on('TrancheAssigned',(user,trancheId,score)=>{
+            const t=tLabel(trancheId);
+            txnLog.unshift({id:'TXN-'+String(txnLog.length+1).padStart(8,'0'),loanId:'LOAN-'+user.slice(-6),tranche:t,block:'#live',hash:user,status:'Created',ts:new Date().toLocaleString()});
+            renderLedger();refreshAll();
+        });
+        await loadChain();
+        toast('Contract Connected','On-chain data loaded','success');
+    }catch(e){toast('Contract Error',e.message,'error')}
+}
+
+async function loadChain(){
+    if(!contract)return;
+    try{
+        const users=await contract.getAllUsers();
+        if(!users.length)return;
+        const chain=await Promise.all(users.map(async(addr,i)=>{
+            const[tr,sc]=await Promise.all([contract.getTranche(addr),contract.getScore(addr)]);
+            const t=tr,s=Number(sc);
+            return{addr,name:'User '+addr.slice(2,8),loanId:'LOAN-'+String(i+1).padStart(6,'0'),tranche:t,score:s,
+                loanAmt:Math.round(100000+Math.random()*400000),
+                trancheType:t==='AAA'?'Senior Secured':t==='AA'?'Mezzanine':'Junior',
+                rate:t==='AAA'?'4.5%':t==='AA'?'6.5%':'9.0%',
+                status:s>=75?'approved':s>=50?'processing':'pending',
+                stage:s>=75?5:s>=50?3:2,stageMax:5,
+                stageLabel:s>=75?'Final Approval':s>=50?'Compliance Check':'Document Review',
+                submitted:new Date().toLocaleDateString(),minted:s>=75,
+                tokenId:s>=75?`TKN-${t}-${String(i+1).padStart(8,'0')}`:null};
+        }));
+        allUsers=[...chain,...allUsers.filter(u=>!chain.find(c=>c.addr===u.addr))];
+        refreshAll();
+    }catch(e){}
+}
+
+/* REFRESH ALL */
+function refreshAll(){refreshDashboard();renderLedger();renderApps();updateAppFilterCounts()}
+
+/* DASHBOARD */
+function refreshDashboard(){
+    const total=allUsers.length,approved=allUsers.filter(u=>u.status==='approved').length,processing=allUsers.filter(u=>u.status==='processing').length;
+    const aaa=allUsers.filter(u=>u.tranche==='AAA').length,aa=allUsers.filter(u=>u.tranche==='AA').length,b=allUsers.filter(u=>u.tranche==='B').length;
+    const aaaA=allUsers.filter(u=>u.tranche==='AAA'&&u.status==='approved').length;
+    const aaA=allUsers.filter(u=>u.tranche==='AA'&&u.status==='approved').length;
+    const bA=allUsers.filter(u=>u.tranche==='B'&&u.status==='approved').length;
+    document.getElementById('d-total').textContent=total;
+    document.getElementById('d-approved').textContent=approved;
+    document.getElementById('d-processing').textContent=processing;
+    document.getElementById('tc-aaa').textContent=`${aaaA}/${aaa}`;
+    document.getElementById('tc-aa').textContent=`${aaA}/${aa}`;
+    document.getElementById('tc-b').textContent=`${bA}/${b}`;
+    document.getElementById('tc-aaa-bar').style.width=aaa?(aaaA/aaa*100)+'%':'0%';
+    document.getElementById('tc-aa-bar').style.width=aa?(aaA/aa*100)+'%':'0%';
+    document.getElementById('tc-b-bar').style.width=b?(bA/b*100)+'%':'0%';
+    document.getElementById('tc-aaa-pct').textContent=aaa?Math.round(aaaA/aaa*100)+'% Approved':'—% Approved';
+    document.getElementById('tc-aa-pct').textContent=aa?Math.round(aaA/aa*100)+'% Approved':'—% Approved';
+    document.getElementById('tc-b-pct').textContent=b?Math.round(bA/b*100)+'% Approved':'—% Approved';
+    document.getElementById('ls-total').textContent=txnLog.length;
+    document.getElementById('ls-aaa').textContent=txnLog.filter(t=>t.tranche==='AAA').length;
+    document.getElementById('ls-aa').textContent=txnLog.filter(t=>t.tranche==='AA').length;
+    document.getElementById('ls-b').textContent=txnLog.filter(t=>t.tranche==='B').length;
+    const minted=allUsers.filter(u=>u.minted).slice(0,5);
+    document.getElementById('recentTokenized').innerHTML=minted.map(u=>`
+        <div class="token-item">
+            <div class="tranche-badge tb-${u.tranche.toLowerCase()}">${u.tranche}</div>
+            <div class="token-info"><div class="token-name">${u.name}</div><div class="token-id">${u.loanId}</div></div>
+            <div class="token-right"><div class="token-amount">$${u.loanAmt.toLocaleString()}</div><div><span class="token-tag">✓ Tokenized</span></div></div>
+        </div>`).join('');
+}
+
+/* LEDGER */
+function renderLedger(){
+    let items=[...txnLog];
+    if(ledgerFilter!=='all')items=items.filter(t=>t.tranche===ledgerFilter);
+    const q=(document.getElementById('ledgerSearch')?.value||'').toLowerCase();
+    if(q)items=items.filter(t=>t.id.toLowerCase().includes(q)||t.loanId.toLowerCase().includes(q)||t.hash.toLowerCase().includes(q));
+    document.getElementById('txnList').innerHTML=items.length?items.map(t=>`
+        <div class="txn-card">
+            <div class="tranche-badge tb-${t.tranche.toLowerCase()}" style="border-radius:8px">${t.tranche}</div>
+            <div class="txn-info">
+                <div class="txn-top"><span class="txn-id">${t.id}</span><span class="status-pill ${t.status==='Created'?'sp-created':'sp-stamped'}">${t.status}</span></div>
+                <div class="txn-meta"><span>Loan ID: <strong>${t.loanId}</strong></span><span>Block: <strong>${t.block}</strong></span></div>
+                <div class="txn-hash">${t.hash}</div>
+            </div>
+            <div class="txn-right">
+                <div class="txn-time"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${t.ts}</div>
+                <div class="view-link"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>View Block</div>
+            </div>
+        </div>`).join(''):'<div class="empty">No transactions found</div>';
+}
+function setLedgerFilter(f,el){ledgerFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderLedger()}
+
+/* APPS */
+function updateAppFilterCounts(){
+    const c={all:allUsers.length,approved:0,processing:0,pending:0,rejected:0};
+    allUsers.forEach(u=>{if(c[u.status]!==undefined)c[u.status]++});
+    Object.keys(c).forEach(k=>{const el=document.getElementById('af-'+k);if(el)el.textContent=c[k]});
+}
+function setAppFilter(f,el){appFilter=f;document.querySelectorAll('.af-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderApps()}
+function renderApps(){
+    let items=[...allUsers];
+    if(appFilter!=='all')items=items.filter(u=>u.status===appFilter);
+    const q=(document.getElementById('appSearch')?.value||'').toLowerCase();
+    if(q)items=items.filter(u=>u.name.toLowerCase().includes(q)||u.loanId.toLowerCase().includes(q)||(u.tokenId||'').toLowerCase().includes(q));
+    document.getElementById('appList').innerHTML=items.length?items.map(u=>`
+        <div class="app-card">
+            <div style="display:flex">
+                <div class="app-card-body">
+                    <div class="app-top">
+                        <div class="app-tranche-badge atb-${u.tranche.toLowerCase()}"><div class="atb-label">Tranche</div><div class="atb-val">${u.tranche}</div></div>
+                        <div class="app-main">
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem">
+                                <div><div class="app-name">${u.name}</div><div class="app-loan-id">${u.loanId}</div></div>
+                                <div class="app-status ${sClass(u.status)}">${sIcon(u.status)} ${cap(u.status)}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="app-fields">
+                        <div><div class="app-field-label">Loan Amount</div><div class="app-field-val">$${u.loanAmt.toLocaleString()}</div></div>
+                        <div><div class="app-field-label">Risk Score</div><div class="app-field-val teal">${u.score}/100</div></div>
+                        <div><div class="app-field-label">Tranche Type</div><div class="app-field-val">${u.trancheType}</div></div>
+                        <div><div class="app-field-label">Interest Rate</div><div class="app-field-val">${u.rate}</div></div>
+                    </div>
+                    <div class="reveri-row">
+                        <div class="reveri-label"><span>Reverification Stage: ${u.stageLabel}</span><span>${u.stage}/${u.stageMax}</span></div>
+                        <div class="reveri-track"><div class="reveri-fill" style="width:${(u.stage/u.stageMax)*100}%"></div></div>
+                    </div>
+                </div>
+                <div class="app-badge-panel">
+                    ${u.minted
+                        ?`<svg class="badge-icon minted" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="6"/><path d="M9 13.5L12 16l3-2.5M12 16v5M9 21h6"/></svg><div class="digital-badge-label">Digital Badge</div><div class="badge-token-id">${u.tokenId}</div>`
+                        :`<svg class="badge-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="6"/><path d="M9 13.5L12 16l3-2.5M12 16v5M9 21h6"/></svg><div style="font-size:0.72rem;color:var(--text-3);margin-top:0.4rem;text-align:center">Badge pending approval</div>`}
+                </div>
+            </div>
+            <div class="app-footer"><span>Submitted: ${u.submitted}</span><span>Last Updated: ${new Date().toLocaleTimeString()}</span></div>
+        </div>`).join(''):'<div class="empty">No applications found</div>';
+}
+function sClass(s){return{approved:'as-approved',processing:'as-processing',pending:'as-pending',rejected:'as-rejected'}[s]||''}
+function sIcon(s){const m={approved:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',processing:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',pending:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',rejected:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'};return m[s]||''}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+
+/* SCORER */
+function previewScore(){
+    const credit=parseFloat(document.getElementById('in-credit').value)||0;
+    const dti=parseFloat(document.getElementById('in-dti').value)||100;
+    const income=parseFloat(document.getElementById('in-income').value)||0;
+    const payment=document.getElementById('in-payment').value;
+    const emp=document.getElementById('in-employment').value;
+    const cP=Math.round(Math.min(30,Math.max(0,((credit-300)/550)*30)));
+    const dP=dti<=36?25:dti<=43?18:dti<=50?10:dti<=60?4:0;
+    const iP=income>=150000?20:income>=100000?16:income>=70000?12:income>=50000?8:income>=30000?4:0;
+    const pP={excellent:15,good:10,fair:5,poor:0,'':0}[payment]??0;
+    const eP={employed:10,self_employed:7,part_time:4,unemployed:0,'':0}[emp]??0;
+    const total=cP+dP+iP+pP+eP;
+    document.getElementById('scoreDisplay').textContent=total;
+    const fill=document.getElementById('scoreFill');
+    fill.style.width=total+'%';
+    fill.style.background=total>=75?'var(--green)':total>=50?'var(--teal)':'var(--red)';
+    const tId=total>=75?3:total>=50?2:1;
+    const t=tLabel(tId);
+    document.getElementById('tranchePreviewTag').innerHTML=`<span class="tag tag-${t.toLowerCase()}" style="font-size:0.85rem;padding:0.3rem 0.9rem">${t}</span>`;
+    document.getElementById('bp-credit').textContent=`${cP} / 30`;
+    document.getElementById('bp-dti').textContent=`${dP} / 25`;
+    document.getElementById('bp-income').textContent=`${iP} / 20`;
+    document.getElementById('bp-payment').textContent=`${pP} / 15`;
+    document.getElementById('bp-emp').textContent=`${eP} / 10`;
+    return{score:total,trancheId:total>=75?1:total>=50?2:3};
+}
+
+async function submitApplicant(){
+    const addr=document.getElementById('in-address').value.trim();
+    const name=document.getElementById('in-name').value.trim()||'Unknown';
+    const ipfs=document.getElementById('in-ipfs').value.trim();
+    const loanAmt=parseFloat(document.getElementById('in-loanamt').value)||0;
+    if(!ethers.isAddress(addr)){toast('Invalid Address','Enter a valid Ethereum address','error');return}
+    if(!ipfs){toast('Missing IPFS Ref','Provide an encrypted data reference','error');return}
+    const{score,trancheId}=previewScore();
+    const t=tLabel(trancheId);
+    showModal('Confirm Submission',`Submit ${name} to Tranche ${t} (score: ${score}).${!contract?' Demo mode — no wallet connected.':' This will write to the blockchain.'}`,async()=>{
+        if(!contract){
+            const nu={addr,name,loanId:'LOAN-'+String(allUsers.length+1).padStart(6,'0'),tranche:t,score,loanAmt,
+                trancheType:t==='AAA'?'Senior Secured':t==='AA'?'Mezzanine':'Junior',
+                rate:t==='AAA'?'4.5%':t==='AA'?'6.5%':'9.0%',
+                status:score>=75?'approved':score>=50?'processing':'pending',
+                stage:score>=75?5:score>=50?3:2,stageMax:5,
+                stageLabel:score>=75?'Final Approval':score>=50?'Compliance Check':'Document Review',
+                submitted:new Date().toLocaleDateString(),minted:score>=75,
+                tokenId:score>=75?`TKN-${t}-${String(allUsers.length+1).padStart(8,'0')}`:null};
+            allUsers.unshift(nu);
+            txnLog.unshift({id:'TXN-'+String(txnLog.length+1).padStart(8,'0'),loanId:nu.loanId,tranche:t,block:'#demo',hash:addr,status:'Created',ts:new Date().toLocaleString()});
+            refreshAll();clearForm();
+            toast('Application Submitted',`${name} → Tranche ${t} (${score})`,'success');
+            showPage('applications',document.querySelectorAll('.nav-tab')[2]);return;
+        }
+        const btn=document.getElementById('submitBtn');
+        btn.disabled=true;btn.innerHTML='<div class="spin"></div> Submitting…';
+        try{
+            const tx=await contract.assignTranche(addr,trancheId,score,ipfs);
+            toast('Transaction Sent','TX: '+tx.hash.slice(0,20)+'…','info');
+            await tx.wait();
+            toast('Tranche Assigned',`${name} → ${t} (${score})`,'success');
+            clearForm();showPage('applications',document.querySelectorAll('.nav-tab')[2]);
+        }catch(e){toast('Failed',e.reason||e.message,'error')}
+        finally{btn.disabled=false;btn.textContent='Submit to Blockchain'}
+    });
+}
+
+function clearForm(){
+    ['in-name','in-address','in-credit','in-dti','in-income','in-loanamt','in-ipfs'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+    document.getElementById('in-payment').value='';document.getElementById('in-employment').value='';
+    document.getElementById('scoreDisplay').textContent='—';document.getElementById('scoreFill').style.width='0%';
+    document.getElementById('tranchePreviewTag').innerHTML='';
+    ['bp-credit','bp-dti','bp-income','bp-payment','bp-emp'].forEach(id=>document.getElementById(id).textContent='—');
+}
+
+/* CHARTS */
+let chartsBuilt=false;
+function renderCharts(){
+    if(chartsBuilt)return;chartsBuilt=true;
+    const days=['Mar 1','Mar 2','Mar 3','Mar 4','Mar 5','Mar 6','Mar 7','Mar 8','Mar 9'];
+    const N='#0d2d4a',T='#0bbfbf',ff="'Plus Jakarta Sans',sans-serif";
+    new Chart(document.getElementById('trendsChart'),{type:'line',data:{labels:days,datasets:[
+        {label:'Applications',data:[11,16,18,13,11,19,19,18,14],borderColor:N,backgroundColor:'transparent',tension:0.4,pointRadius:4,pointBackgroundColor:N,pointBorderColor:'#fff',pointBorderWidth:2},
+        {label:'Approved',data:[7,10,12,10,8,13,14,13,11],borderColor:T,backgroundColor:'transparent',tension:0.4,pointRadius:4,pointBackgroundColor:T,pointBorderColor:'#fff',pointBorderWidth:2},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,pointStyle:'circle',boxWidth:8,font:{family:ff,size:11}}}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:ff,size:11}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:ff,size:11}},beginAtZero:true}}}});
+    new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels:['Tranche AAA','Tranche AA','Tranche B'],datasets:[{data:[ 8, 6, 6],backgroundColor:[N,T,'rgba(11,191,191,0.4)'],borderColor:'#fff',borderWidth:3,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{family:ff,size:11},boxWidth:10,padding:12}}},cutout:'52%'}});
+    new Chart(document.getElementById('approvalChart'),{type:'bar',data:{labels:['Tranche AAA','Tranche AA','Tranche B'],datasets:[{label:'Approval Rate %',data:[67,60,60],backgroundColor:[N,T,'rgba(11,191,191,0.5)'],borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{family:ff,size:11}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:ff,size:11}},beginAtZero:true,max:100}}}});
+    new Chart(document.getElementById('volumeChart'),{type:'bar',data:{labels:['Tranche AAA','Tranche AA','Tranche B'],datasets:[{label:'Volume ($)',data:[2100000,1400000,1200000],backgroundColor:[N,T,'rgba(11,191,191,0.5)'],borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{family:ff,size:11}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:ff,size:11},callback:v=>'$'+(v/1e6).toFixed(1)+'M'},beginAtZero:true}}}});
+}
+
+/* HELPERS */
+function tLabel(id){return{1:'B',2:'AA',3:'AAA',AAA:'AAA',AA:'AA',B:'B'}[id]||'B'}
+function showPage(name,el){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('page-'+name).classList.add('active');
+    if(el)el.classList.add('active');
+    if(name==='analytics')setTimeout(renderCharts,50);
+}
+function toast(title,msg,type='info'){
+    const icons={success:'✓',error:'✕',info:'ℹ'};
+    const el=document.createElement('div');el.className='toast '+type;
+    el.innerHTML=`<div class="toast-ico">${icons[type]}</div><div><div class="toast-title">${title}</div>${msg?`<div class="toast-msg">${msg}</div>`:''}</div>`;
+    document.getElementById('toasts').appendChild(el);setTimeout(()=>el.remove(),4500);
+}
+let _cb=null;
+function showModal(title,body,onConfirm){
+    document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').textContent=body;_cb=onConfirm;
+    document.getElementById('confirmModal').classList.add('show');
+    document.getElementById('modalConfirmBtn').onclick=()=>{closeModal();_cb&&_cb()};
+}
+function closeModal(){document.getElementById('confirmModal').classList.remove('show')}
+document.getElementById('confirmModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});
+</script>
+</body>
+</html>

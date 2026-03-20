@@ -230,6 +230,23 @@ Losses are absorbed bottom-up; protections tighten as risk increases.
 
 ---
 
+## Frontend Enhancements (implemented)
+
+* Added a full interactive dashboard in `frontend/index.html` plus `frontend/styles.css` and `frontend/app.js`.
+* Bank admin workflow includes:
+  * enter applicant data, run off-chain scoring, derive tranche (AAA/AA/B), and submit to smart contract
+  * preview score breakdown, progress bar, and tranche badge
+  * fetch on-chain profiles and tranche data via public read methods
+  * a paginated/filtered application list with responsive grid cards (no vertical stack-only layout)
+* Analytics page with Chart.js charts:
+  * Application trends line chart
+  * Tranche distribution doughnut chart (with legend spacing and clean labeling)
+  * Approval rate / volume bar charts
+* “Digital Badge” panel in application cards with minted/pending states, color-coded tranche variants, and token IDs.
+* Added toast notifications, modals, and responsive styling.
+
+---
+
 ## Risk Scoring Algorithm
 
 The off-chain scorer (`scripts/scorer.js`) takes six inputs from the bank admin and produces a **composite score (0–100)** and a **tranche assignment**.
@@ -313,8 +330,7 @@ Copy the printed contract address and add it to `.env`:
 CONTRACT_ADDRESS=0x...
 ```
 
-### Running Tests
-
+**Terminal 3 — run tests:**
 ```bash
 npx hardhat test
 ```
@@ -330,6 +346,14 @@ node scripts/scorer.js
 Runs three example applicants (AAA, AA, B) and prints scores and breakdowns to the console.
 
 ---
+
+**Terminal 4 — run the frontend locally:**
+```bash
+cd frontend
+npx serve .
+```
+
+Then open the local URL shown in the terminal (typically `http://localhost:3000`).
 
 ## Frontend Integration Guide
 
