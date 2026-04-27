@@ -181,9 +181,9 @@ contract CreditTranche is AccessControl {
     // ─── Internal helpers ────────────────────────────────────────────────────
 
     function _trancheLabel(Tranche t) internal pure returns (string memory) {
-        if (t == Tranche.AAA)       return "AAA";
-        if (t == Tranche.AA)        return "AA";
-        if (t == Tranche.B)         return "B";
+        if (t == Tranche.AAA)       return "A";
+        if (t == Tranche.AA)        return "B";
+        if (t == Tranche.B)         return "C";
         return "UNASSIGNED";
     }
 }

@@ -188,7 +188,7 @@ Losses are absorbed bottom-up; protections tighten as risk increases.
                              │
 ┌────────────────────────────▼────────────────────────┐
 │               SMART CONTRACT (on-chain)              │
-│  - Stores: userAddress → tranche (AAA / AA / B)      │
+│  - Stores: userAddress → tranche (A / B / C)      │
 │  - Stores: encrypted data blob reference             │
 │  - Access control: only verified admins can read     │
 │  - Emits events on tranche assignment                │
@@ -234,7 +234,7 @@ Losses are absorbed bottom-up; protections tighten as risk increases.
 
 * Added a full interactive dashboard in `frontend/index.html` plus `frontend/styles.css` and `frontend/app.js`.
 * Bank admin workflow includes:
-  * enter applicant data, run off-chain scoring, derive tranche (AAA/AA/B), and submit to smart contract
+  * enter applicant data, run off-chain scoring, derive tranche (A/B/C), and submit to smart contract
   * preview score breakdown, progress bar, and tranche badge
   * fetch on-chain profiles and tranche data via public read methods
   * a paginated/filtered application list with responsive grid cards (no vertical stack-only layout)

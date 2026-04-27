@@ -19,7 +19,7 @@ Three logical layers are implemented:
 - `contracts/CreditTranche.sol`
 - Uses OpenZeppelin `AccessControl` to enforce permissioned actions.
 - Stores a borrower profile mapping to:
-  - `Tranche` enum value (`B`, `AA`, `AAA`)
+  - `Tranche` enum value (`C`, `B`, `A`)
   - numeric score `0 - 100`
   - encrypted data reference string
   - timestamp of last update

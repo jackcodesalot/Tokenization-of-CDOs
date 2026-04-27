@@ -4,7 +4,7 @@
  * Off-chain credit scoring engine.
  *
  * Run by a bank admin backend before submitting to the smart contract.
- * Returns a 0–100 composite score and the matching tranche (AAA / AA / B).
+ * Returns a 0–100 composite score and the matching tranche (A / B / C).
  *
  * SCORING BREAKDOWN (total: 100 pts)
  * ─────────────────────────────────
@@ -16,9 +16,9 @@
  *
  * TRANCHE THRESHOLDS
  * ──────────────────
- *  AAA  →  score >= 75   (low risk)
- *  AA   →  score >= 50   (moderate risk)
- *  B    →  score <  50   (high risk)
+ *  A  →  score >= 75   (low risk)
+ *  B  →  score >= 50   (moderate risk)
+ *  C  →  score <  50   (high risk)
  */
 
 // ─── Scoring tables ──────────────────────────────────────────────────────────
@@ -70,9 +70,9 @@ function scoreEmployment(status) {
 // ─── Tranche assignment ───────────────────────────────────────────────────────
 
 function assignTranche(score) {
-  if (score >= 75) return { label: "AAA", id: 3 };
-  if (score >= 50) return { label: "AA",  id: 2 };
-  return              { label: "B",   id: 1 };
+  if (score >= 75) return { label: "A", id: 3 };
+  if (score >= 50) return { label: "B",  id: 2 };
+  return              { label: "C",   id: 1 };
 }
 
 // ─── Main export ─────────────────────────────────────────────────────────────
@@ -121,7 +121,7 @@ function scoreApplicant(data) {
 
   return {
     score,        // 0–100
-    tranche,      // "AAA" | "AA" | "B"
+    tranche,      // "A" | "B" | "C"
     trancheId,    // 3 | 2 | 1  (used when calling the contract)
     loanAmount,   // passed through for storage
     breakdown,    // per-factor scores for transparency
@@ -135,7 +135,7 @@ module.exports = { scoreApplicant };
 if (require.main === module) {
   const examples = [
     {
-      label: "Strong applicant (expect AAA)",
+      label: "Strong applicant (expect A)",
       data: {
         creditScore:      780,
         annualIncome:     120_000,
@@ -146,7 +146,7 @@ if (require.main === module) {
       },
     },
     {
-      label: "Mid-range applicant (expect AA)",
+      label: "Mid-range applicant (expect B)",
       data: {
         creditScore:      680,
         annualIncome:     60_000,
@@ -157,7 +157,7 @@ if (require.main === module) {
       },
     },
     {
-      label: "Risky applicant (expect B)",
+      label: "Risky applicant (expect C)",
       data: {
         creditScore:      580,
         annualIncome:     30_000,

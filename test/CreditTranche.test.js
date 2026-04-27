@@ -80,20 +80,20 @@ describe("CreditTranche", function () {
 
   // ── Tranche assignment ─────────────────────────────────────────────────────
   describe("assignTranche", () => {
-    it("assigns AAA (trancheId=3) correctly", async () => {
+    it("assigns A (trancheId=3) correctly", async () => {
       await contract.connect(admin).assignTranche(user1.address, 3, 80, FAKE_REF);
-      expect(await contract.getTranche(user1.address)).to.equal("AAA");
+      expect(await contract.getTranche(user1.address)).to.equal("A");
       expect(await contract.getScore(user1.address)).to.equal(80);
     });
 
-    it("assigns AA (trancheId=2) correctly", async () => {
+    it("assigns B (trancheId=2) correctly", async () => {
       await contract.connect(admin).assignTranche(user1.address, 2, 60, FAKE_REF);
-      expect(await contract.getTranche(user1.address)).to.equal("AA");
+      expect(await contract.getTranche(user1.address)).to.equal("B");
     });
 
-    it("assigns B (trancheId=1) correctly", async () => {
+    it("assigns C (trancheId=1) correctly", async () => {
       await contract.connect(admin).assignTranche(user1.address, 1, 35, FAKE_REF);
-      expect(await contract.getTranche(user1.address)).to.equal("B");
+      expect(await contract.getTranche(user1.address)).to.equal("C");
     });
 
     it("emits TrancheAssigned on first assignment", async () => {
@@ -149,13 +149,13 @@ describe("CreditTranche", function () {
 
     it("getProfile returns correct data for admin", async () => {
       const [tranche, score, ref] = await contract.connect(admin).getProfile(user1.address);
-      expect(tranche).to.equal(3n);    // Tranche.AAA
+      expect(tranche).to.equal(3n);    // Tranche.A
       expect(score).to.equal(85n);
       expect(ref).to.equal(FAKE_REF);
     });
 
     it("getTranche is public (no role needed)", async () => {
-      expect(await contract.connect(stranger).getTranche(user1.address)).to.equal("AAA");
+      expect(await contract.connect(stranger).getTranche(user1.address)).to.equal("A");
     });
 
     it("getScore is public", async () => {
@@ -186,19 +186,19 @@ describe("CreditTranche", function () {
   describe("Scorer → Contract integration", () => {
     const cases = [
       {
-        label: "AAA applicant",
+        label: "A applicant",
         data: { creditScore: 780, annualIncome: 120_000, dtiRatio: 0.18, employmentStatus: "full-time",     paymentHistory: 0.99, loanAmount: 25_000 },
-        expectedTranche: "AAA",
-      },
-      {
-        label: "AA applicant",
-        data: { creditScore: 680, annualIncome: 60_000,  dtiRatio: 0.38, employmentStatus: "self-employed", paymentHistory: 0.91, loanAmount: 15_000 },
-        expectedTranche: "AA",
+        expectedTranche: "A",
       },
       {
         label: "B applicant",
-        data: { creditScore: 580, annualIncome: 30_000,  dtiRatio: 0.55, employmentStatus: "part-time",     paymentHistory: 0.65, loanAmount: 10_000 },
+        data: { creditScore: 680, annualIncome: 60_000,  dtiRatio: 0.38, employmentStatus: "self-employed", paymentHistory: 0.91, loanAmount: 15_000 },
         expectedTranche: "B",
+      },
+      {
+        label: "C applicant",
+        data: { creditScore: 580, annualIncome: 30_000,  dtiRatio: 0.55, employmentStatus: "part-time",     paymentHistory: 0.65, loanAmount: 10_000 },
+        expectedTranche: "C",
       },
     ];
 
